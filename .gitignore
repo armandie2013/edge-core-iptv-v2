@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+logs/*
+!logs/.gitkeep
+storage/hls/*
+!storage/hls/.gitkeep
+cache/nginx/*
+!cache/nginx/.gitkeep
