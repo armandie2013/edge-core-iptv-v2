@@ -26,6 +26,25 @@ function formatBytes(bytes: number): string {
   return `${size.toFixed(unitIndex === 0 ? 0 : 2)} ${units[unitIndex]}`;
 }
 
+function formatDateTimeAR(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 function percent(part: number, total: number): string {
   if (!total) return "0%";
   return `${((part / total) * 100).toFixed(1)}%`;
@@ -478,7 +497,7 @@ export async function panelController(_req: Request, res: Response) {
         </div>
         <div class="meta">
           <span>Actualizado</span>
-          <strong>${escapeHtml(new Date(stats.generatedAt).toLocaleString("es-AR"))}</strong>
+          <strong>${escapeHtml(formatDateTimeAR(stats.generatedAt))}</strong>
         </div>
       </div>
 
@@ -703,7 +722,7 @@ export async function panelController(_req: Request, res: Response) {
 
                       return `
                         <tr>
-                          <td>${escapeHtml(item.time)}</td>
+                          <td>${escapeHtml(formatDateTimeAR(item.time))}</td>
                           <td>${escapeHtml(item.clientIp)}</td>
                           <td class="uri" title="${escapeHtml(item.uri)}">${escapeHtml(item.uri)}</td>
                           <td><span class="badge ${statusClass}">${item.status}</span></td>
