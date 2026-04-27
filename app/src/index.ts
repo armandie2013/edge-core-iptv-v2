@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { env } from "./config/env";
 import healthRoute from "./routes/health.route";
 import panelRoute from "./routes/panel.route";
+import relayRoute from "./routes/relay.route";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use(healthRoute);
 app.use(panelRoute);
+app.use(relayRoute);
 
 app.get("/", (_req, res) => {
   return res.status(200).json({
@@ -26,6 +28,7 @@ app.get("/", (_req, res) => {
     publicBaseUrl: env.PUBLIC_BASE_URL,
     originBaseUrl: env.ORIGIN_BASE_URL,
     panelUrl: `${env.PUBLIC_BASE_URL}/panel`,
+    relayMode: "one-origin-connection-per-active-channel",
     timestamp: new Date().toISOString(),
   });
 });
@@ -36,4 +39,5 @@ app.listen(env.APP_PORT, () => {
   console.log(`[edge-core-iptv-v2] publicBaseUrl: ${env.PUBLIC_BASE_URL}`);
   console.log(`[edge-core-iptv-v2] originBaseUrl: ${env.ORIGIN_BASE_URL}`);
   console.log(`[edge-core-iptv-v2] edgeAccessLog: ${env.EDGE_ACCESS_LOG}`);
+  console.log(`[edge-core-iptv-v2] relayReconnectMs: ${env.RELAY_RECONNECT_MS}`);
 });
