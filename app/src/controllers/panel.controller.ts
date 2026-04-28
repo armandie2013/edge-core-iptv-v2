@@ -108,7 +108,9 @@ export async function panelController(_req: Request, res: Response) {
       --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -120,7 +122,7 @@ export async function panelController(_req: Request, res: Response) {
       color: var(--text);
       font-family: "Segoe UI", Arial, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
-      line-height: 1.45;
+      line-height: 1.38;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
@@ -128,7 +130,7 @@ export async function panelController(_req: Request, res: Response) {
     .page {
       width: min(1280px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 22px 0 34px;
+      padding: 18px 0 28px;
     }
 
     .hero,
@@ -140,8 +142,8 @@ export async function panelController(_req: Request, res: Response) {
 
     .hero {
       border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
       background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.68));
     }
 
@@ -154,9 +156,9 @@ export async function panelController(_req: Request, res: Response) {
     }
 
     .eyebrow {
-      margin: 0 0 8px;
+      margin: 0 0 7px;
       color: var(--cyan);
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       font-weight: 600;
@@ -165,7 +167,7 @@ export async function panelController(_req: Request, res: Response) {
     h1 {
       margin: 0;
       font-size: clamp(24px, 3vw, 36px);
-      line-height: 1.12;
+      line-height: 1.08;
       font-weight: 650;
       letter-spacing: -0.025em;
       color: #f8fafc;
@@ -173,7 +175,7 @@ export async function panelController(_req: Request, res: Response) {
 
     .subtitle {
       color: var(--text-soft);
-      margin: 10px 0 0;
+      margin: 9px 0 0;
       font-size: 14px;
       font-weight: 400;
     }
@@ -181,20 +183,20 @@ export async function panelController(_req: Request, res: Response) {
     .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       border: 1px solid rgba(52, 211, 153, 0.45);
       background: rgba(16, 185, 129, 0.10);
       color: var(--emerald);
       border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
+      padding: 7px 11px;
+      font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
     }
 
     .dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 999px;
       background: var(--emerald);
       box-shadow: 0 0 16px rgba(52, 211, 153, 0.95);
@@ -204,14 +206,14 @@ export async function panelController(_req: Request, res: Response) {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
     .meta {
       background: rgba(2, 6, 23, 0.28);
       border: 1px solid rgba(51, 65, 85, 0.65);
       border-radius: 16px;
-      padding: 12px;
+      padding: 10px 12px;
       min-width: 0;
     }
 
@@ -219,15 +221,15 @@ export async function panelController(_req: Request, res: Response) {
     .card-title,
     th {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.055em;
       font-weight: 600;
     }
 
     .meta span {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .meta strong {
@@ -241,36 +243,36 @@ export async function panelController(_req: Request, res: Response) {
     .cards {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .card {
       border-radius: 20px;
-      padding: 16px;
+      padding: 14px;
       min-width: 0;
     }
 
     .card-title {
-      margin: 0 0 8px;
+      margin: 0 0 7px;
     }
 
     .value {
-      font-size: 28px;
-      line-height: 1.05;
+      font-size: 27px;
+      line-height: 1.02;
       margin: 0;
       font-weight: 650;
       letter-spacing: -0.035em;
     }
 
     .value.small {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 600;
       letter-spacing: -0.02em;
     }
 
     .hint {
-      margin: 8px 0 0;
+      margin: 7px 0 0;
       color: var(--text-soft);
       font-size: 12px;
       font-weight: 400;
@@ -285,8 +287,8 @@ export async function panelController(_req: Request, res: Response) {
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
 
     .section-title {
@@ -294,7 +296,7 @@ export async function panelController(_req: Request, res: Response) {
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .section-title h2 {
@@ -328,11 +330,11 @@ export async function panelController(_req: Request, res: Response) {
 
     th,
     td {
-      padding: 10px 12px;
+      padding: 7px 9px;
       border-bottom: 1px solid rgba(51, 65, 85, 0.55);
       text-align: left;
-      font-size: 13px;
-      line-height: 1.35;
+      font-size: 12px;
+      line-height: 1.22;
       color: #e2e8f0;
       white-space: normal;
       overflow-wrap: anywhere;
@@ -344,6 +346,7 @@ export async function panelController(_req: Request, res: Response) {
     th {
       color: #cbd5e1;
       background: rgba(15, 23, 42, 0.94);
+      font-size: 10px;
     }
 
     tr:last-child td {
@@ -354,18 +357,20 @@ export async function panelController(_req: Request, res: Response) {
       overflow-wrap: anywhere;
       word-break: break-all;
       font-family: "Consolas", "Courier New", monospace;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1.18;
       color: #dbeafe;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       max-width: 100%;
       border-radius: 999px;
-      padding: 4px 8px;
-      font-size: 11px;
-      line-height: 1.1;
+      padding: 3px 6px;
+      font-size: 10px;
+      line-height: 1;
       font-weight: 600;
       border: 1px solid rgba(148, 163, 184, 0.35);
       background: rgba(148, 163, 184, 0.10);
@@ -392,15 +397,97 @@ export async function panelController(_req: Request, res: Response) {
       background: rgba(251, 113, 133, 0.10);
     }
 
+    .table-compact th,
+    .table-compact td {
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+
+    .table-active-channels col.col-canal {
+      width: 31%;
+    }
+
+    .table-active-channels col.col-clientes {
+      width: 7%;
+    }
+
+    .table-active-channels col.col-origin {
+      width: 7%;
+    }
+
+    .table-active-channels col.col-estado {
+      width: 10%;
+    }
+
+    .table-active-channels col.col-uptime {
+      width: 9%;
+    }
+
+    .table-active-channels col.col-chunk {
+      width: 15%;
+    }
+
+    .table-active-channels col.col-recibido {
+      width: 10%;
+    }
+
+    .table-active-channels col.col-enviado {
+      width: 11%;
+    }
+
+    .table-top-streams col.col-uri {
+      width: 70%;
+    }
+
+    .table-top-streams col.col-req {
+      width: 10%;
+    }
+
+    .table-top-streams col.col-hit {
+      width: 10%;
+    }
+
+    .table-top-streams col.col-miss {
+      width: 10%;
+    }
+
+    .table-last-requests col.col-hora {
+      width: 16%;
+    }
+
+    .table-last-requests col.col-ip {
+      width: 13%;
+    }
+
+    .table-last-requests col.col-uri {
+      width: 38%;
+    }
+
+    .table-last-requests col.col-status {
+      width: 8%;
+    }
+
+    .table-last-requests col.col-cache {
+      width: 8%;
+    }
+
+    .table-last-requests col.col-upstream {
+      width: 10%;
+    }
+
+    .table-last-requests col.col-tiempo {
+      width: 7%;
+    }
+
     .error-box {
       border: 1px solid rgba(251, 113, 133, 0.45);
       background: rgba(251, 113, 133, 0.10);
       color: #fecdd3;
       border-radius: 16px;
-      padding: 14px;
-      margin-top: 16px;
-      font-size: 14px;
-      line-height: 1.45;
+      padding: 12px;
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.38;
       font-weight: 400;
     }
 
@@ -408,7 +495,7 @@ export async function panelController(_req: Request, res: Response) {
       color: var(--muted);
       font-size: 12px;
       text-align: center;
-      margin-top: 18px;
+      margin-top: 16px;
       font-weight: 400;
     }
 
@@ -418,7 +505,7 @@ export async function panelController(_req: Request, res: Response) {
       .grid-2 { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 760px) {
       .page {
         width: min(100% - 18px, 1280px);
         padding-top: 12px;
@@ -429,15 +516,23 @@ export async function panelController(_req: Request, res: Response) {
 
       .card,
       .hero {
-        padding: 14px;
+        padding: 13px;
       }
 
       .value { font-size: 24px; }
 
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 760px;
+      }
+
       th,
       td {
         font-size: 12px;
-        padding: 9px 8px;
+        padding: 7px 8px;
       }
 
       .section-title {
@@ -538,14 +633,24 @@ export async function panelController(_req: Request, res: Response) {
       </div>
     </section>
 
-    <section class="card" style="margin-bottom: 16px;">
+    <section class="card" style="margin-bottom: 14px;">
       <div class="section-title">
         <h2>Canales activos / calientes</h2>
         <span>El canal queda abierto aunque no tenga clientes</span>
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table class="table-compact table-active-channels">
+          <colgroup>
+            <col class="col-canal" />
+            <col class="col-clientes" />
+            <col class="col-origin" />
+            <col class="col-estado" />
+            <col class="col-uptime" />
+            <col class="col-chunk" />
+            <col class="col-recibido" />
+            <col class="col-enviado" />
+          </colgroup>
           <thead>
             <tr>
               <th>Canal</th>
@@ -599,7 +704,7 @@ export async function panelController(_req: Request, res: Response) {
         </div>
 
         <div class="table-wrap">
-          <table>
+          <table class="table-compact">
             <thead>
               <tr>
                 <th>IP</th>
@@ -637,7 +742,13 @@ export async function panelController(_req: Request, res: Response) {
         </div>
 
         <div class="table-wrap">
-          <table>
+          <table class="table-compact table-top-streams">
+            <colgroup>
+              <col class="col-uri" />
+              <col class="col-req" />
+              <col class="col-hit" />
+              <col class="col-miss" />
+            </colgroup>
             <thead>
               <tr>
                 <th>URI</th>
@@ -677,7 +788,7 @@ export async function panelController(_req: Request, res: Response) {
         </div>
 
         <div class="table-wrap">
-          <table>
+          <table class="table-compact">
             <thead>
               <tr>
                 <th>Estado</th>
@@ -704,7 +815,7 @@ export async function panelController(_req: Request, res: Response) {
         </div>
 
         <div class="table-wrap">
-          <table>
+          <table class="table-compact">
             <thead>
               <tr>
                 <th>Status</th>
@@ -736,7 +847,16 @@ export async function panelController(_req: Request, res: Response) {
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table class="table-compact table-last-requests">
+          <colgroup>
+            <col class="col-hora" />
+            <col class="col-ip" />
+            <col class="col-uri" />
+            <col class="col-status" />
+            <col class="col-cache" />
+            <col class="col-upstream" />
+            <col class="col-tiempo" />
+          </colgroup>
           <thead>
             <tr>
               <th>Hora</th>
