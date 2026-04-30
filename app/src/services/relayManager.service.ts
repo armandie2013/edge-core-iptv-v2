@@ -18,6 +18,7 @@ type RelayChannel = {
   originUrl: string;
   createdAt: Date;
   lastClientAt?: Date;
+  lastIdleAt?: Date;
   lastChunkAt?: Date;
   lastReconnectAt?: Date;
   lastError?: string;
@@ -28,6 +29,7 @@ type RelayChannel = {
   upstreamReq?: ClientRequest;
   upstreamRes?: IncomingMessage;
   reconnectTimer?: NodeJS.Timeout;
+  idleCloseTimer?: NodeJS.Timeout;
 
   started: boolean;
   connecting: boolean;
@@ -47,6 +49,10 @@ export type RelayChannelStats = {
   createdAt: string;
   uptimeSeconds: number;
   lastClientAt?: string;
+  lastIdleAt?: string;
+  idleSeconds: number;
+  idleCloseEnabled: boolean;
+  idleCloseMs: number;
   lastChunkAt?: string;
   lastReconnectAt?: string;
   lastError?: string;
@@ -118,6 +124,7 @@ class RelayManager {
   attachClient(channelId: string, req: Request, res: Response) {
     const channel = this.getOrCreateChannel(channelId);
 
+    this.clearIdleCloseTimer(channel);
     this.ensureStarted(channel);
 
     const clientId = createClientId(channelId);
@@ -133,6 +140,7 @@ class RelayManager {
 
     channel.clients.set(clientId, client);
     channel.lastClientAt = new Date();
+    channel.lastIdleAt = undefined;
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "video/mp2t");
@@ -149,7 +157,7 @@ class RelayManager {
     }
 
     const removeClient = () => {
-      channel.clients.delete(clientId);
+      this.removeClient(channel, clientId);
     };
 
     req.on("close", removeClient);
@@ -170,6 +178,8 @@ class RelayManager {
     totalReconnects: number;
     totalBytesFromOrigin: number;
     totalBytesToClients: number;
+    idleCloseEnabled: boolean;
+    idleCloseMs: number;
     channels: RelayChannelStats[];
   } {
     const channels = Array.from(this.channels.values()).map((channel) => {
@@ -188,6 +198,10 @@ class RelayManager {
         createdAt: channel.createdAt.toISOString(),
         uptimeSeconds: secondsSince(channel.createdAt),
         lastClientAt: nowIso(channel.lastClientAt),
+        lastIdleAt: nowIso(channel.lastIdleAt),
+        idleSeconds: channel.lastIdleAt ? secondsSince(channel.lastIdleAt) : 0,
+        idleCloseEnabled: env.RELAY_IDLE_CLOSE_MS > 0,
+        idleCloseMs: env.RELAY_IDLE_CLOSE_MS,
         lastChunkAt: nowIso(channel.lastChunkAt),
         lastReconnectAt: nowIso(channel.lastReconnectAt),
         lastError: channel.lastError,
@@ -219,6 +233,8 @@ class RelayManager {
       totalReconnects: channels.reduce((sum, channel) => sum + channel.reconnects, 0),
       totalBytesFromOrigin: channels.reduce((sum, channel) => sum + channel.bytesFromOrigin, 0),
       totalBytesToClients: channels.reduce((sum, channel) => sum + channel.bytesToClients, 0),
+      idleCloseEnabled: env.RELAY_IDLE_CLOSE_MS > 0,
+      idleCloseMs: env.RELAY_IDLE_CLOSE_MS,
       channels: channels.sort((a, b) => b.clientCount - a.clientCount || a.channelId.localeCompare(b.channelId)),
     };
   }
@@ -265,7 +281,7 @@ class RelayManager {
   }
 
   private connectToOrigin(channel: RelayChannel) {
-    if (channel.connecting || channel.upstreamConnected) {
+    if (channel.stopped || channel.connecting || channel.upstreamConnected) {
       return;
     }
 
@@ -318,7 +334,7 @@ class RelayManager {
 
           for (const clientStream of channel.clients.values()) {
             if (clientStream.res.destroyed || clientStream.res.writableEnded) {
-              channel.clients.delete(clientStream.id);
+              this.removeClient(channel, clientStream.id);
               continue;
             }
 
@@ -327,18 +343,23 @@ class RelayManager {
               clientStream.bytesSent += chunk.length;
               channel.bytesToClients += chunk.length;
             } catch {
-              channel.clients.delete(clientStream.id);
+              this.removeClient(channel, clientStream.id);
             }
           }
 
           /**
-           * Importante:
-           * Si no hay clientes, descartamos los chunks, pero NO cerramos
-           * la conexión al Origin. Esto mantiene el canal caliente en el Edge.
+           * Si no hay clientes:
+           * - RELAY_IDLE_CLOSE_MS=0 mantiene el canal caliente siempre.
+           * - RELAY_IDLE_CLOSE_MS>0 lo cierra después del tiempo configurado.
            */
+          if (channel.clients.size === 0) {
+            this.scheduleIdleClose(channel);
+          }
         });
 
         originResponse.on("end", () => {
+          if (channel.stopped) return;
+
           channel.lastError = "Origin cerró el stream";
           this.clearUpstream(channel);
           this.scheduleReconnect(channel);
@@ -353,6 +374,8 @@ class RelayManager {
         });
 
         originResponse.on("error", (error) => {
+          if (channel.stopped) return;
+
           channel.lastError = error.message;
           this.clearUpstream(channel);
           this.scheduleReconnect(channel);
@@ -363,6 +386,8 @@ class RelayManager {
     channel.upstreamReq = request;
 
     request.on("error", (error) => {
+      if (channel.stopped) return;
+
       channel.lastError = error.message;
       this.clearUpstream(channel);
       this.scheduleReconnect(channel);
@@ -374,6 +399,98 @@ class RelayManager {
     });
 
     request.end();
+  }
+
+  private removeClient(channel: RelayChannel, clientId: string) {
+    if (!channel.clients.has(clientId)) {
+      return;
+    }
+
+    channel.clients.delete(clientId);
+
+    if (channel.clients.size === 0) {
+      this.scheduleIdleClose(channel);
+    }
+  }
+
+  private scheduleIdleClose(channel: RelayChannel) {
+    if (channel.stopped) {
+      return;
+    }
+
+    if (channel.clients.size > 0) {
+      this.clearIdleCloseTimer(channel);
+      return;
+    }
+
+    if (env.RELAY_IDLE_CLOSE_MS <= 0) {
+      channel.lastIdleAt = channel.lastIdleAt || new Date();
+      return;
+    }
+
+    if (channel.idleCloseTimer) {
+      return;
+    }
+
+    channel.lastIdleAt = new Date();
+
+    channel.idleCloseTimer = setTimeout(() => {
+      channel.idleCloseTimer = undefined;
+
+      const currentChannel = this.channels.get(channel.channelId);
+
+      if (!currentChannel) {
+        return;
+      }
+
+      if (currentChannel.clients.size > 0) {
+        currentChannel.lastIdleAt = undefined;
+        return;
+      }
+
+      this.stopChannel(currentChannel, `Canal cerrado por inactividad (${env.RELAY_IDLE_CLOSE_MS} ms sin clientes)`);
+    }, env.RELAY_IDLE_CLOSE_MS);
+  }
+
+  private clearIdleCloseTimer(channel: RelayChannel) {
+    if (channel.idleCloseTimer) {
+      clearTimeout(channel.idleCloseTimer);
+      channel.idleCloseTimer = undefined;
+    }
+
+    channel.lastIdleAt = undefined;
+  }
+
+  private clearReconnectTimer(channel: RelayChannel) {
+    if (channel.reconnectTimer) {
+      clearTimeout(channel.reconnectTimer);
+      channel.reconnectTimer = undefined;
+    }
+  }
+
+  private stopChannel(channel: RelayChannel, message: string) {
+    channel.stopped = true;
+    channel.started = false;
+    channel.connecting = false;
+    channel.upstreamConnected = false;
+    channel.lastError = message;
+
+    this.clearIdleCloseTimer(channel);
+    this.clearReconnectTimer(channel);
+    this.clearUpstream(channel);
+
+    for (const client of channel.clients.values()) {
+      try {
+        if (!client.res.destroyed && !client.res.writableEnded) {
+          client.res.end();
+        }
+      } catch {
+        // ignoramos errores al cerrar clientes
+      }
+    }
+
+    channel.clients.clear();
+    this.channels.delete(channel.channelId);
   }
 
   private clearUpstream(channel: RelayChannel) {
@@ -406,6 +523,11 @@ class RelayManager {
 
     channel.reconnectTimer = setTimeout(() => {
       channel.reconnectTimer = undefined;
+
+      if (channel.stopped) {
+        return;
+      }
+
       this.connectToOrigin(channel);
     }, env.RELAY_RECONNECT_MS);
   }
@@ -423,6 +545,7 @@ class RelayManager {
 
     channel.clients.clear();
     channel.lastError = message;
+    this.scheduleIdleClose(channel);
   }
 }
 

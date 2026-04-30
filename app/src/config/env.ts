@@ -18,7 +18,14 @@ export const env = {
    * Relay interno:
    * - El Edge abre una sola conexión al Origin por canal.
    * - Los clientes se cuelgan de ese flujo local.
-   * - Por ahora, si un canal queda sin clientes, lo dejamos abierto.
+   * - RELAY_IDLE_CLOSE_MS controla cuándo cerrar canales sin clientes.
+   *
+   * RELAY_IDLE_CLOSE_MS=0
+   *   No cierra nunca canales sin clientes.
+   *
+   * RELAY_IDLE_CLOSE_MS=10800000
+   *   Cierra canales sin clientes después de 3 horas.
    */
   RELAY_RECONNECT_MS: Number(process.env.RELAY_RECONNECT_MS || 3000),
+  RELAY_IDLE_CLOSE_MS: Number(process.env.RELAY_IDLE_CLOSE_MS || 0),
 };
